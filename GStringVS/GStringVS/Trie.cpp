@@ -110,8 +110,27 @@ void Trie::suffixInsert(const vector<Structure>& suffix) {
     }
 }
 
-// Query the Trie with a path
-set<int> Trie::query(const vector<Structure>& path) const {
+// Calculate similarity between query and table entries
+double Trie::calculateSimilarity(const vector<int>& queryAttributes, const vector<int>& tableAttributes) const {
+    double score = 0.0;
+    size_t size = min(queryAttributes.size(), tableAttributes.size());
+
+    // Weigh type matches more heavily 
+    for (size_t i = 0; i < size - 1; ++i) { // Exclude the graph ID
+        int diff = abs(queryAttributes[i] - tableAttributes[i]);
+        int maxValue = max(queryAttributes[i], tableAttributes[i]);
+        score += (maxValue == 0 ? 1.0 : 1.0 - static_cast<double>(diff) / maxValue); // Normalize differences
+    }
+    return score / (size - 1); // Normalize to a range of [0, 1]
+}
+
+// Check if two entries are similar based on a threshold
+bool Trie::isSimilar(const vector<int>& queryAttributes, const vector<int>& tableAttributes, double threshold) const {
+    return calculateSimilarity(queryAttributes, tableAttributes) >= threshold;
+}
+
+// Updated query function with approximate matching
+set<int> Trie::query(const vector<Structure>& path, double threshold) const {
     TrieNode* node = root; // Start from the root
     set<int> result;       // Graph IDs matching the query path
 
@@ -120,8 +139,7 @@ set<int> Trie::query(const vector<Structure>& path) const {
 
         // Check if the structure exists as a child
         if (node->children.find(structure_summary) == node->children.end()) {
-            // If not found, return an empty set (no match)
-            return {};
+            return {}; // No match
         }
 
         // Move to the matching child node
@@ -131,7 +149,10 @@ set<int> Trie::query(const vector<Structure>& path) const {
         set<int> currentIDs;
         for (int tableID : node->editTableIDs) {
             for (const auto& entry : editTables[tableID].entries) {
-                currentIDs.insert(entry.back()); // Graph ID is the last element
+                vector<int> queryAttributes = structure.getAttributes(); // Attributes for this structure
+                if (isSimilar(queryAttributes, entry, threshold)) {
+                    currentIDs.insert(entry.back()); // Graph ID is the last element
+                }
             }
         }
 

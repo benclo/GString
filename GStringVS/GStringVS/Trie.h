@@ -47,7 +47,7 @@ public:
     void suffixInsert(const vector<Structure>& suffix);
 
     // Query the Trie with a path
-    set<int> query(const vector<Structure>& path) const;
+    set<int> query(const vector<Structure>& path, double threshold) const;
 
     // Display the Trie as connections from root to leaves
     void displayConnections(TrieNode* node, const string& indent = "") const;
@@ -57,6 +57,10 @@ public:
 
     // Display all Edit Tables (for debugging purposes)
     void displayEditTables() const;
+
+    bool isSimilar(const vector<int>& queryAttributes, const vector<int>& tableAttributes, double threshold) const;
+
+    double calculateSimilarity(const vector<int>& queryAttributes, const vector<int>& tableAttributes) const;
 };
 
 #endif // TRIE_H
