@@ -69,7 +69,7 @@ std::pair<std::string, int> generate_random_structure() {
 
 // Function to generate a single GString with connections
 std::string generate_gstring(int g_id) {
-    int num_structures = random_int(10, 15); // Random number of structures per GString
+    int num_structures = random_int(3, 6); // Random number of structures per GString
     std::ostringstream gstring;
     gstring << "g" << g_id << " "; // Use to_string for the ID
     int last_node = random_int(1, 5); // Random starting node for connections
@@ -94,7 +94,7 @@ int main() {
 
     Trie trie;
 
-    int graphQ = 500;
+    int graphQ = 550;
 
     vector<Structure> queryPath;
 
